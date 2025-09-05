@@ -40,6 +40,10 @@ export async function POST(req){
             return NextResponse.json({ success: false, message: "Chat not found" });
           }
 
+        // Initialize messages array if it doesn't exist
+        if (!data.messages) {
+            data.messages = [];
+        }
         
         // Create a user message object
         const userPrompt = {
@@ -87,7 +91,16 @@ export async function POST(req){
         // Send the current message
         const result = await chat.sendMessage(prompt);
         const response = await result.response;
+        
+        if (!response) {
+            throw new Error("No response from Gemini API");
+        }
+        
         const responseText = response.text();
+
+        if (!responseText) {
+            throw new Error("Empty response from Gemini API");
+        }
 
         // Create assistant message object
         const message = {
@@ -105,6 +118,11 @@ export async function POST(req){
         return NextResponse.json({success: true, data: message})
 
     } catch (error) {
-        return NextResponse.json({ success: false, error: error.message });
+        console.error("❌ Error in AI route:", error);
+        return NextResponse.json({ 
+            success: false, 
+            error: error.message || "Internal server error",
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 }

@@ -114,8 +114,16 @@ const PromptBox = ({setIsLoading, isLoading}) => {
         setPrompt(promptCopy);
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error("Error sending prompt:", error);
+      const errorMessage = error.response?.data?.error || error.message || "Failed to send message";
+      toast.error(errorMessage);
       setPrompt(promptCopy);
+      
+      // Remove the user message if the API call failed
+      setSelectedChat((prev) => ({
+        ...prev,
+        messages: prev.messages.slice(0, -1),
+      }));
     } finally {
       setIsLoading(false);
     }
