@@ -1,6 +1,7 @@
 # 🧠 DeepSeek Clone
-
-<div align="center">
+- 🤖 **AI-Powered Chat** - Intelligent responses using [Google Gemini API](https://ai.google.dev/)
+- 🎭 **Configurable AI Personalities** - Multiple system instructions (default, coding, creative, academic, casual, cat)
+- 💬 **Persistent Chat History** - All conversations saved in [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)<div align="center">
 
 ![DeepSeek Clone](https://img.shields.io/badge/DeepSeek-AI%20Clone-blue?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
@@ -19,7 +20,7 @@
 ## ✨ Features
 
 - 🔐 **Secure Authentication** - Seamless login/signup with [Clerk.dev](https://clerk.dev)
-- 🤖 **AI-Powered Chat** - Intelligent responses using [DeepSeek API](https://platform.deepseek.com)
+- 🤖 **AI-Powered Chat** - Intelligent responses using [Google Gemini API](https://ai.google.dev/)
 - � **Persistent Chat History** - All conversations saved in [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 - 🎨 **Modern UI/UX** - Beautiful, responsive design with Tailwind CSS
 - 🚀 **Fast Performance** - Built with Next.js 15 and Turbopack
@@ -49,7 +50,7 @@
 **Backend**
 - [Next.js API Routes](https://nextjs.org/docs/api-routes/introduction) - Server Logic
 - [Mongoose](https://mongoosejs.com) - MongoDB ODM
-- [DeepSeek API](https://platform.deepseek.com) - AI Integration
+- [Google Gemini API](https://ai.google.dev/) - AI Integration
 
 </td>
 </tr>
@@ -109,8 +110,8 @@ Make sure you have the following installed:
    # ===== MONGODB DATABASE =====
    MONGODB_URI=your_mongodb_atlas_connection_string
 
-   # ===== DEEPSEEK API =====
-   DEEPSEEK_API_KEY=your_deepseek_api_key
+   # ===== GEMINI API =====
+   GEMINI_API_KEY=your_gemini_api_key
 
    # ===== APPLICATION URL =====
    NEXT_PUBLIC_BASE_URL=http://localhost:3000
@@ -147,12 +148,12 @@ Make sure you have the following installed:
 4. Whitelist your IP address
 5. Get your connection string: `MONGODB_URI`
 
-### 🤖 DeepSeek API Setup
+### 🤖 Google Gemini API Setup
 
-1. Visit [DeepSeek Platform](https://platform.deepseek.com)
-2. Create an account and verify your email
+1. Visit [Google AI Studio](https://aistudio.google.com/)
+2. Create a Google account or sign in
 3. Navigate to API Keys section
-4. Generate a new API key: `DEEPSEEK_API_KEY`
+4. Generate a new API key: `GEMINI_API_KEY`
 
 ---
 
@@ -196,6 +197,34 @@ deepseek-clone/
 ├── package.json               # Dependencies & scripts
 ├── postcss.config.mjs         # PostCSS configuration
 └── README.md                  # Project documentation
+```
+
+## 🎭 AI System Instructions
+
+The application supports multiple AI personalities through configurable system instructions:
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `default` | Helpful AI assistant | General questions and conversations |
+| `coding` | Expert software developer | Programming help, code reviews, debugging |
+| `creative` | Creative writing assistant | Storytelling, poetry, creative content |
+| `academic` | Academic research assistant | Scholarly responses, formal explanations |
+| `casual` | Friendly, conversational AI | Relaxed, approachable interactions |
+| `cat` | Cat personality (Neko) | Fun interactions with cat-like responses |
+
+### Usage Example
+
+```javascript
+// API call with system instruction
+fetch('/api/chat/ai', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    chatId: 'your-chat-id',
+    prompt: 'I have two dogs in my house. How many paws are in my house?',
+    systemType: 'cat' // Optional, defaults to 'default'
+  })
+});
 ```
 
 ---

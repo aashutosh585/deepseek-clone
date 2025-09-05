@@ -1,16 +1,14 @@
 export const maxDuration = 60;
 
-import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import connectDB from "@/config/db";
 import Chat from "@/models/Chat";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { getSystemInstruction } from "@/config/systemInstructions";
 
-// Initialize OpenAI client with DeepSeek API key and base URL
-const openai = new OpenAI({
-        baseURL: 'https://api.deepseek.com',
-        apiKey: process.env.DEEPSEEK_API_KEY
-});
+// Initialize Google Generative AI
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 export async function POST(req){
     console.log("🔥 POST handler called");
@@ -18,9 +16,9 @@ export async function POST(req){
         const {userId} = getAuth(req)
         console.log("✅ Auth extracted:", userId);
 
-        // Extract chatId and prompt from the request body
-        const { chatId, prompt } = await req.json();
-        console.log("✅ Body:", chatId, prompt);
+        // Extract chatId, prompt, and optional systemType from the request body
+        const { chatId, prompt, systemType = 'default' } = await req.json();
+        console.log("✅ Body:", chatId, prompt, systemType);
 
         if(!userId){
             console.log("❌ User not authenticated");
@@ -55,15 +53,49 @@ export async function POST(req){
 
         console.log("message",prompt);
         
-        // Call the DeepSeek API to get a chat completion
-        const completion = await openai.chat.completions.create({
-            messages: [{ role: "system", content: prompt }],
-            model: "deepseek-chat",
+        // Get the model with system instruction
+        const systemInstruction = getSystemInstruction(systemType);
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-2.5-flash",
+            systemInstruction: systemInstruction
         });
 
-        const message = completion.choices[0].message;
+        // Prepare conversation history for Gemini API
+        const history = [];
+        
+        // Add conversation history from the chat (excluding the just added user message)
+        for (let i = 0; i < data.messages.length - 1; i++) {
+            const msg = data.messages[i];
+            if (msg.role === "user") {
+                history.push({
+                    role: "user",
+                    parts: [{ text: msg.content }]
+                });
+            } else if (msg.role === "assistant") {
+                history.push({
+                    role: "model",
+                    parts: [{ text: msg.content }]
+                });
+            }
+        }
 
-        message.timestamp = Date.now()
+        // Start a chat session with history
+        const chat = model.startChat({
+            history: history
+        });
+
+        // Send the current message
+        const result = await chat.sendMessage(prompt);
+        const response = await result.response;
+        const responseText = response.text();
+
+        // Create assistant message object
+        const message = {
+            role: "assistant",
+            content: responseText,
+            timestamp: Date.now()
+        };
+
         data.messages.push(message);
         console.log("Before save:", data.messages);
         data.markModified("messages");
